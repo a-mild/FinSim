@@ -7,9 +7,10 @@ import plotly.graph_objs as go
 class PlotContainer(v.VuetifyTemplate):
     figure = traitlets.Any(go.FigureWidget()).tag(sync=True, **w.widget_serialization)
 
+    # TODO: put this in vue file
     template = traitlets.Unicode("""
         <template>
-            <v-main>
+            <v-main app>
                 <jupyter-widget :widget="figure" />
             </v-main>
         </template>        

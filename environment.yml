@@ -1,13 +1,14 @@
 name: PensionSimulator
 channels:
+  - conda-forge
   - defaults
 dependencies:
-  - python=3.7
-  - jupyter
   - ipyvuetify
   - ipywidgets
-  - traitlets==4.3.3
-  - blinker
-  - jupyterlab>=3.1
-  - voila>=0.2.11
+  - traitlets
   - plotly
+  - pandas
+  - blinker
+  - numpy
+  - python-dateutil
+  - ipython

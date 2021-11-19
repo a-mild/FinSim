@@ -14,11 +14,12 @@ class TraceController(v.VuetifyTemplate):
 
     drawer_open = traitlets.Bool(default_value=False).tag(sync=True)
 
+    # TODO: put this in template file
     @traitlets.default('template')
     def _template(self):
         return """
         <template>
-            <v-navigation-drawer v-model="drawer_open">
+            <v-navigation-drawer app v-model="drawer_open">
                 <jupyter-widget :widget="aktiva" />
                 <v-divider></v-divider>
                 <jupyter-widget :widget="passiva" />
