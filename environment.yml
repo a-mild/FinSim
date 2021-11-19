@@ -12,3 +12,5 @@ dependencies:
   - numpy
   - python-dateutil
   - ipython
+  - jupyterlab>=3.1
+  - voila>=0.2.11
