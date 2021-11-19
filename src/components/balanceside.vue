@@ -1,7 +1,7 @@
 <v-list>
     <v-list-item>
         <v-list-item-title class="text-h6">
-            {{name}}
+            {{side}}
             <v-menu v-model="menu" offset-y>
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn
@@ -19,7 +19,9 @@
                 </v-list>
             </v-menu>
         </v-list-item-title>
-        <v-list-group v-for="w in widgets">
     </v-list-item>
+    <template v-for="w in tracewidgets" >
+        <jupyter-widget :widget="w" />
+    </template>
 
 </v-list>

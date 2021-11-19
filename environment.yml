@@ -4,10 +4,10 @@ channels:
 dependencies:
   - python=3.7
   - jupyter
-  - bqplot
   - ipyvuetify
   - ipywidgets
   - traitlets==4.3.3
   - blinker
   - jupyterlab>=3.1
   - voila>=0.2.11
+  - plotly

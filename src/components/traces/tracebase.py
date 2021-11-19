@@ -1,4 +1,4 @@
-
+from src.components.traces.tracewidget import TraceWidget
 
 class Trace:
     tracetypes = {}
@@ -10,3 +10,8 @@ class Trace:
     @classmethod
     def tracenames(cls):
         return list(cls.tracetypes.keys())
+
+    @classmethod
+    def create_trace(cls, side, tracename: str, **kwargs):
+        class_ = cls.tracetypes[tracename]
+        return class_(side)

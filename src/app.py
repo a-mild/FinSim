@@ -1,9 +1,8 @@
-import copy
-
 import ipyvuetify as v
 import ipywidgets as w
 import traitlets
-from traitlets import observe
+
+import plotly.graph_objs as go
 
 from src.components.tracecontroller import TraceController
 from src.components.appbar import AppBar
@@ -28,21 +27,9 @@ class App(v.VuetifyTemplate):
 
     def __init__(self, model):
         self.model = model
-        super().__init__()
         self.tracecontroller_drawer = TraceController(model)
         self.app_bar = AppBar(model)
-        self.plot_container = PlotContainer(parent=self)
-
-
-    def toggle_drawer(self, data=None):
-        print("toggle drawer in parent")
-        x = copy.deepcopy(self.tracecontroller_drawer.drawer_open)
-        self.tracecontroller_drawer.drawer_open = not x
-
-    def toggled(self, change):
-        print(type(change["old"]))
-        print(change["old"])
-        print(type(change["new"]))
-        print(change["new"])
-        print(self.drawer_open)
-
+        self.plot_container = PlotContainer()
+        trace = go.Scatter(x=self.model.df.index, y=self.model.df["sum"])
+        self.plot_container.figure.add_trace(trace)
+        super().__init__()
