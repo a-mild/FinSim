@@ -3,9 +3,11 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python=3.7
+  - jupyter
   - ipyvuetify
   - ipywidgets
-  - traitlets
+  - traitlets==4.3.3
   - plotly
   - pandas
   - blinker
