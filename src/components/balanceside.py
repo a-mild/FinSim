@@ -5,6 +5,7 @@ import traitlets
 from blinker import signal
 
 from src.components.traces import Trace
+from src.enums import BalanceSides
 
 add_trace = signal("add-trace")
 delete_trace = signal("delete-trace")
@@ -13,14 +14,15 @@ delete_trace = signal("delete-trace")
 class BalanceSide(v.VuetifyTemplate):
     template_file = "./src/components/balanceside.vue"
 
-    side = traitlets.Unicode("").tag(sync=True)
+    name = traitlets.Unicode().tag(sync=True)
     menu = traitlets.Bool(False).tag(sync=True)
     tracewidgets = traitlets.Dict(default_value={}).tag(sync=True, **w.widget_serialization)
 
     tracenames = traitlets.List(default_value=Trace.tracenames()).tag(sync=True)
     
-    def __init__(self, side):
+    def __init__(self, side: BalanceSides):
         self.side = side
+        self.name = self.side.name
         super().__init__()
         delete_trace.connect(self.delete, sender=self.side)
 

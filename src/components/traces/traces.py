@@ -16,11 +16,12 @@ from src.components.traces.controls.interestpicker import InterestPicker
 from src.components.traces.controls.valuepicker import ValuePicker
 from src.components.traces.tracebase import Trace
 from src.components.traces.tracewidget import TraceWidget
+from src.enums import BalanceSides
 
 
 @dataclass
 class ConstantPaymentTrace(Trace):
-    side: str
+    side: BalanceSides
     default_name: str = "Constant Payment"
     uuid: UUID = field(default_factory=uuid4)
     params: Dict = field(default_factory=lambda: {
@@ -45,11 +46,20 @@ class ConstantPaymentTrace(Trace):
         value = self.params["value"]
         q = 1 + self.params["interest"]/100
         interest_factor_per_month = pow(q, 1/12)
-        return self.get_array(array_length, start_idx, end_idx, value, interest_factor_per_month)
+        result = self.get_array(array_length, start_idx, end_idx, value, interest_factor_per_month)
+        if self.side is BalanceSides.Passiva:
+            result = -result
+        return result
 
     @staticmethod
     @lru_cache(maxsize=None)
-    def get_array(array_length: int, start_idx: int, end_idx: int, value: float, q_m: float):
+    def get_array(
+            array_length: int,
+            start_idx: int,
+            end_idx: int,
+            value: float,
+            q_m: float)\
+            -> np.array:
         delta = end_idx - start_idx
         triangles = [np.tri(delta, delta, -k) for k in range(1, delta+1)]
         interest_factors = np.power(q_m, reduce(np.add, triangles))
@@ -70,29 +80,52 @@ class ConstantPaymentTrace(Trace):
 
 @dataclass
 class SinglePaymentTrace(Trace):
-    side: str
+    side: BalanceSides
     default_name: str = "Single Payment"
     uuid: UUID = field(default_factory=uuid4)
     params: Dict = field(default_factory=lambda: {
-        "date": datetime.today(),
-        "value": 1000
+        "date": (datetime.today() + pd.offsets.MonthBegin(-1)).normalize(),
+        "value": 1000,
+        "interest": 0.0
     })
 
 
     def __post_init__(self):
         self.controls = [
             DatePicker("date", label="Date", v_model=self.params["date"].strftime("%Y-%m")),
-            ValuePicker("value", v_model=str(self.params["value"]))
+            ValuePicker("value", v_model=str(self.params["value"])),
+            InterestPicker("interest", v_model=str(self.params["interest"]))
         ]
 
 
     # TODO: implement with get array
     def get_timeseries(self, dti):
-        def compute_value(dt):
-            if dt < self.params["date"]:
-                return 0
-            return self.params["value"]
-        return [compute_value(dt) for dt in dti]
+        array_length = len(dti)
+        start_idx = dti.get_loc(self.params["date"])
+        value = self.params["value"]
+        q = 1 + self.params["interest"]/100
+        interest_factor_per_month = pow(q, 1/12)
+        result = self.get_array(array_length, start_idx, value, interest_factor_per_month)
+        if self.side is BalanceSides.Passiva:
+            result = -result
+        return result
+
+    @staticmethod
+    @lru_cache(maxsize=None)
+    def get_array(
+            array_length: int,
+            start_idx: int,
+            value: float,
+            q_m: float)\
+            -> np.array:
+        delta = array_length - start_idx
+        array_values = np.ones(delta) * value
+        array_interest = np.arange(delta)
+        array_interest = np.power(q_m, array_interest)
+        result = np.multiply(array_values, array_interest)
+        return np.append(np.zeros(start_idx), result)
+
+
 
     def create_widget(self):
         return TraceWidget(

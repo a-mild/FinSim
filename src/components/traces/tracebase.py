@@ -1,6 +1,9 @@
 from src.components.traces.tracewidget import TraceWidget
+from src.enums import BalanceSides
+
 
 class Trace:
+    # dictionary that holds all trace types that get registered as subclass of this class
     tracetypes = {}
 
     def __init_subclass__(cls, **kwargs):
@@ -12,6 +15,6 @@ class Trace:
         return list(cls.tracetypes.keys())
 
     @classmethod
-    def create_trace(cls, side, tracename: str, **kwargs):
+    def create_trace(cls, side: BalanceSides, tracename: str, **kwargs):
         class_ = cls.tracetypes[tracename]
         return class_(side)

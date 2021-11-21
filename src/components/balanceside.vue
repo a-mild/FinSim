@@ -1,7 +1,7 @@
 <v-list>
     <v-list-item>
         <v-list-item-title class="text-h6">
-            {{side}}
+            {{name}}
             <v-menu v-model="menu" offset-y>
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn

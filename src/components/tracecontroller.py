@@ -5,6 +5,7 @@ import traitlets
 from blinker import signal
 
 from src.components.balanceside import BalanceSide
+from src.enums import BalanceSides
 
 
 class TraceController(v.VuetifyTemplate):
@@ -30,8 +31,8 @@ class TraceController(v.VuetifyTemplate):
     def __init__(self, model):
         self.model = model
 
-        self.aktiva = BalanceSide("Aktiva")
-        self.passiva = BalanceSide("Passiva")
+        self.aktiva = BalanceSide(BalanceSides.Aktiva)
+        self.passiva = BalanceSide(BalanceSides.Passiva)
         self.toggle_signal = signal("toggle-drawer")
         self.toggle_signal.connect(self.toggle_drawer)
         super().__init__()

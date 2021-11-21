@@ -6,6 +6,8 @@ import traitlets
 
 from blinker import signal
 
+from src.enums import BalanceSides
+
 delete_trace = signal("delete-trace")
 value_updated = signal("value-updated")
 update_trace = signal("update-trace")
@@ -17,7 +19,7 @@ class TraceWidget(v.VuetifyTemplate):
     name = traitlets.Unicode().tag(sync=True)
     controls = traitlets.List().tag(sync=True, **w.widget_serialization)
 
-    def __init__(self, side: str, uuid: UUID, name: str, controls):
+    def __init__(self, side: BalanceSides, uuid: UUID, name: str, controls):
         self.side = side
         self.uuid = uuid
         self.name = name
