@@ -27,7 +27,7 @@ class App(v.VuetifyTemplate):
 
     def __init__(self, model):
         self.model = model
-        self.tracecontroller_drawer = TraceController(model)
+        self.tracecontroller_drawer = TraceController()
         self.app_bar = AppBar(model)
         self.plot_container = PlotContainer()
         trace = go.Scatter(x=self.model.df.index, y=self.model.df["sum"])

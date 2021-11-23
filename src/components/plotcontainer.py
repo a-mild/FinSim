@@ -10,7 +10,7 @@ class PlotContainer(v.VuetifyTemplate):
     # TODO: put this in vue file
     template = traitlets.Unicode("""
         <template>
-            <v-main app>
+            <v-main>
                 <jupyter-widget :widget="figure" />
             </v-main>
         </template>        

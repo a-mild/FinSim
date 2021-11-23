@@ -4,17 +4,17 @@ from src.enums import BalanceSides
 
 class Trace:
     # dictionary that holds all trace types that get registered as subclass of this class
-    tracetypes = {}
+    _tracetypes = {}
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.tracetypes.update({cls.default_name: cls})
+        cls._tracetypes.update({cls.default_name: cls})
 
     @classmethod
     def tracenames(cls):
-        return list(cls.tracetypes.keys())
+        return list(cls._tracetypes.keys())
 
     @classmethod
     def create_trace(cls, side: BalanceSides, tracename: str, **kwargs):
-        class_ = cls.tracetypes[tracename]
+        class_ = cls._tracetypes[tracename]
         return class_(side)

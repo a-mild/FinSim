@@ -1,4 +1,4 @@
-<v-list-group sub-group no-action>
+<v-list-group sub-group no-action class="pl-0">
     <template v-slot:activator>
         <v-list-item-content>
             <v-list-item-title>{{ name }}</v-list-item-title>

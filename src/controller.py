@@ -6,6 +6,7 @@ from blinker import signal
 
 from src.app import App
 from src.components.traces import Trace
+from src.enums import BalanceSides
 from src.model import Model
 
 add_trace = signal("add-trace")
@@ -27,9 +28,12 @@ class Controller:
         sum_col = self.model.get_sum_column()
         self.app.plot_container.figure.data[0].y = sum_col
 
-    def delete_trace(self, sender, uuid: UUID) -> None:
-        idx = self.model.get_trace_idx(uuid)
+    def delete_trace(self, sender: BalanceSides, uuid: UUID) -> None:
+        # update the tracecontroller view
+        self.app.tracecontroller_drawer.sides[sender.name].delete_trace(uuid)
+        # update the model
         self.model.delete_trace(uuid)
+        # update the plot view
         sum_col = self.model.get_sum_column()
         self.app.plot_container.figure.data[0].y = sum_col
 

@@ -9,33 +9,19 @@ from src.enums import BalanceSides
 
 
 class TraceController(v.VuetifyTemplate):
+    template_file = "./src/components/tracecontroller-template.vue"
 
-    aktiva = traitlets.Any().tag(sync=True, **w.widget_serialization)
-    passiva = traitlets.Any().tag(sync=True, **w.widget_serialization)
+    sides = traitlets.Dict(default_value={
+        "Aktiva": BalanceSide(BalanceSides.Aktiva),
+        "Passiva": BalanceSide(BalanceSides.Passiva)
+    }).tag(sync=True, **w.widget_serialization)
 
     drawer_open = traitlets.Bool(default_value=False).tag(sync=True)
 
-    # TODO: put this in template file
-    @traitlets.default('template')
-    def _template(self):
-        return """
-        <template>
-            <v-navigation-drawer app v-model="drawer_open">
-                <jupyter-widget :widget="aktiva" />
-                <v-divider></v-divider>
-                <jupyter-widget :widget="passiva" />
-            </v-navigation-drawer>    
-        </template>
-        """
-
-    def __init__(self, model):
-        self.model = model
-
-        self.aktiva = BalanceSide(BalanceSides.Aktiva)
-        self.passiva = BalanceSide(BalanceSides.Passiva)
+    def __init__(self):
+        super().__init__()
         self.toggle_signal = signal("toggle-drawer")
         self.toggle_signal.connect(self.toggle_drawer)
-        super().__init__()
 
     def toggle_drawer(self, sender):
         self.drawer_open = not self.drawer_open

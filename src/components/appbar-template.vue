@@ -1,5 +1,5 @@
 <template>
-    <v-app-bar app>
+    <v-app-bar>
         <v-app-bar-nav-icon @click.stop="toggle_drawer()"></v-app-bar-nav-icon>
         <v-toolbar-title>
                 Pension Simulator

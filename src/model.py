@@ -1,5 +1,6 @@
 from collections import OrderedDict
-from dataclasses import dataclass, field
+import marshmallow_dataclass
+from dataclasses import field
 from datetime import datetime
 
 from uuid import UUID
@@ -10,11 +11,11 @@ from typing import Dict, Any, List
 from src.components.traces import Trace
 
 
-@dataclass
+@marshmallow_dataclass.dataclass
 class Model:
     start_date: datetime = datetime.today()
     periods: int = 120
-    traces: OrderedDict = field(default_factory=OrderedDict)
+    traces: Dict[UUID, Trace] = field(default_factory=dict)
 
     def __post_init__(self):
         # prepare the dataframe, freq month start so the timeseries functions work
@@ -31,12 +32,12 @@ class Model:
     def add_trace(self, trace: Trace):
         self.traces.update({trace.uuid: trace})
         ts = trace.get_timeseries(self.df.index)
-        self.df[trace.uuid] = ts
+        self.df[str(trace.uuid)] = ts
         self.update_sum_column()
 
     def delete_trace(self, uuid: UUID):
         self.traces.pop(uuid)
-        self.df.drop(uuid, inplace=True)
+        self.df.drop(columns=str(uuid), inplace=True)
         self.update_sum_column()
 
     def update_trace(self, uuid: UUID, params: Dict[str, Any]):
@@ -50,7 +51,7 @@ class Model:
         """Exclude sum column and compute sum of each month"""
         self.df["sum"] = self.df[self.df.columns.difference(["sum"])].sum(axis=1)
 
-    def get_sum_column(self) -> List[int]:
+    def get_sum_column(self) -> List[float]:
         return self.df["sum"].tolist()
 
     def get_trace_idx(self, uuid: UUID) -> int:
