@@ -1,27 +1,20 @@
 from dataclasses import field
-from marshmallow import Schema
+
 import marshmallow_dataclass
-from marshmallow_enum import EnumField
-
-import pandas as pd
-from functools import lru_cache, reduce
-
 import numpy as np
-from datetime import datetime, date
+from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from functools import lru_cache, reduce
+from marshmallow import Schema
+from typing import ClassVar, Type
 
-from uuid import UUID, uuid4
-
-from typing import List, Any, Dict, ClassVar, Type, Union
-
-from src.utils import utils
 from src.components.traces.controls.datepicker import DatePicker
 from src.components.traces.controls.interestpicker import InterestPicker
 from src.components.traces.controls.valuepicker import ValuePicker
 from src.components.traces.tracebase import Trace
 from src.components.traces.tracewidget import TraceWidget
 from src.enums import BalanceSides
-
+from src.utils import utils
 
 
 @marshmallow_dataclass.dataclass

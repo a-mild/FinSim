@@ -6,7 +6,6 @@ from typing import Any, Dict, ClassVar
 
 import marshmallow_dataclass
 
-from src.components.traces.tracewidget import TraceWidget
 from src.enums import BalanceSides
 
 

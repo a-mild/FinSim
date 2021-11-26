@@ -1,4 +1,4 @@
-name: PensionSimulator
+name: PensionSimulator2
 channels:
   - conda-forge
   - defaults
@@ -21,3 +21,4 @@ dependencies:
   - pip:
       - marshmallow-dataclass
       - marshmallow-enum
+      - typeguard

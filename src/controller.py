@@ -1,5 +1,3 @@
-from typing import Any, Dict
-
 from uuid import UUID
 
 from blinker import signal
