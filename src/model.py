@@ -1,33 +1,41 @@
-from collections import OrderedDict
 import marshmallow_dataclass
+from marshmallow import Schema
 from dataclasses import field
 from datetime import datetime
 
 from uuid import UUID
 
 import pandas as pd
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Union, ClassVar, Type
 
+from src.utils import utils
 from src.components.traces import Trace
+from src.components.traces.traces import SinglePaymentTrace, ConstantPaymentTrace
 
 
 @marshmallow_dataclass.dataclass
 class Model:
-    start_date: datetime = datetime.today()
-    periods: int = 120
-    traces: Dict[UUID, Trace] = field(default_factory=dict)
+    # make sure start_date is beginning of month
+    start_date: datetime = field(
+        default_factory=utils.get_BOM_datetime
+    )
+    periods: int = 480
+    traces: Dict[UUID, Union[SinglePaymentTrace, ConstantPaymentTrace]] = field(default_factory=dict)
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     def __post_init__(self):
-        # prepare the dataframe, freq month start so the timeseries functions work
-        # make sure to include current month
-        self.start_date = (self.start_date + pd.offsets.MonthBegin(-1)).normalize()
+        self.init_dataframe()
+
+    def init_dataframe(self) -> None:
         dti = pd.date_range(self.start_date, periods=self.periods, freq="MS", normalize=True)
         self.df = pd.DataFrame(index=dti, columns=["sum"])
         self.df.loc[:, "sum"] = 0
-
-    def get_xlims(self):
-        idx = self.df.index
-        return (idx[0].date(), idx[-1].date())
+        # if model gets loaded with existing traces, recalculate the df
+        for uuid, trace in self.traces.items():
+            ts = trace.get_timeseries(self.df.index)
+            self.df[str(uuid)] = ts
+        self.update_sum_column()
 
     def add_trace(self, trace: Trace):
         self.traces.update({trace.uuid: trace})
@@ -40,11 +48,15 @@ class Model:
         self.df.drop(columns=str(uuid), inplace=True)
         self.update_sum_column()
 
-    def update_trace(self, uuid: UUID, params: Dict[str, Any]):
+    def reset_traces(self):
+        self.traces.clear()
+        self.init_dataframe()
+
+    def update_trace(self, uuid: UUID, paramname: str, value) -> None:
         trace = self.traces[uuid]
-        trace.params.update(params)
+        setattr(trace.params, paramname, value)
         ts = trace.get_timeseries(self.df.index)
-        self.df[uuid] = ts
+        self.df[str(uuid)] = ts
         self.update_sum_column()
 
     def update_sum_column(self):
@@ -57,15 +69,9 @@ class Model:
     def get_trace_idx(self, uuid: UUID) -> int:
         return self.traces.keys().index(uuid)
 
-    #TODO
-    def reset_all(self):
-        """Reset all traces"""
-        return
-
-    #TODO
     def to_json(self) -> str:
         """Return a json string of the current state of the traces"""
-        return
+        return self.Schema().dumps(self)
 
     #TODO
     def from_json(self, json_str: str):

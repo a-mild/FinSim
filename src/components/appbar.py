@@ -18,11 +18,16 @@ from base64 import b64encode
 download stolen from https://github.com/voila-dashboards/voila/issues/711
 """
 
+save_traces = signal("save-traces")
+upload_traces = signal("upload-traces")
+reset_traces = signal("reset-traces")
+
 
 class AppBar(v.VuetifyTemplate):
     template_file = "./src/components/appbar-template.vue"
 
-    #drawer_opened = traitlets.Bool(default_value=True).tag(sync=True)
+    reset_traces_dialog = traitlets.Bool(default_value=False).tag(sync=True)
+
     loaded_filename = traitlets.Unicode(default_value="No file loaded").tag(sync=True)
     file_upload_widget = traitlets.Any(widgets.FileUpload(
         description="",
@@ -40,14 +45,15 @@ class AppBar(v.VuetifyTemplate):
         sig = signal("toggle-drawer")
         sig.send()
 
-    def vue_reset_all(self, data=None):
-        self.model.reset_all()
+    def vue_reset_traces(self, data=None):
+        self.reset_traces_dialog = False
+        reset_traces.send()
 
-    def upload_traces(self, change):
+    def upload_traces(self, change) -> None:
         res = {filename: f["content"] for filename, f in self.file_upload_widget.value.items()}
         filename, content = res.popitem()
-        self.loaded_filename = f"loaded file: {filename!r}"
-        self.model.from_json(content)
+        result = upload_traces.send(self, filename=filename, content=content)
+        self.loaded_filename = f"{result[0][1]}"
 
     def trigger_file_download(self, text: str, filename: str, kind: str = 'text/json'):
         # see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/Data_URIs for details
@@ -63,7 +69,6 @@ class AppBar(v.VuetifyTemplate):
             clear_output()
             display(HTML(f'<script>{js_code}</script>'))
 
-    def vue_save_traces(self):
+    def vue_save_traces(self, event):
         """Save the state of all traces to a .json file"""
-        json_str = self.model.to_json()
-        self.trigger_file_download(json_str, 'pensionsimulator.json', kind='text/json')
+        save_traces.send()

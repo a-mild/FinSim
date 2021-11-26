@@ -7,6 +7,7 @@ import traitlets
 from blinker import signal
 
 from src.components.traces import Trace
+from src.components.traces.tracewidget import TraceWidget
 from src.enums import BalanceSides
 
 add_trace = signal("add-trace")
@@ -26,15 +27,13 @@ class BalanceSide(v.VuetifyTemplate):
         self.side = side
         self.name = self.side.name
         super().__init__()
-        #delete_trace.connect(self.delete_trace, sender=self.side)
 
-    def vue_add_trace(self, tracename: str):
-        new_trace: Trace = Trace.create_trace(self.side, tracename)
+    def vue_add_trace(self, tracename: str) -> None:
         #send signal and let controller add trace to the model and update the plot
-        add_trace.send(self.side, trace=new_trace)
-        #update the tracewidgets property
-        new_widget = new_trace.create_widget()
+        add_trace.send(self.side, tracename=tracename)
+
+    def add_tracewidget(self, new_widget: TraceWidget) -> None:
         self.tracewidgets = self.tracewidgets + [new_widget]
 
-    def delete_trace(self, uuid: UUID):
+    def delete_trace(self, uuid: UUID) -> None:
         self.tracewidgets = [w for w in self.tracewidgets if not w.uuid == uuid]

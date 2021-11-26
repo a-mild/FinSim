@@ -33,7 +33,7 @@ class InterestPicker(v.VuetifyTemplate):
     def vue_on_change(self, data=None):
         if not self.valid_input:
             return
-        value_updated.send(self)
+        value_updated.send(self.paramname, value=self.get_value())
 
     def get_value(self) -> float:
         if self.use_interest:

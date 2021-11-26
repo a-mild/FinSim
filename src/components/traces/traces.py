@@ -7,13 +7,14 @@ import pandas as pd
 from functools import lru_cache, reduce
 
 import numpy as np
-from datetime import datetime
+from datetime import datetime, date
 from dateutil.relativedelta import relativedelta
 
 from uuid import UUID, uuid4
 
-from typing import List, Any, Dict, ClassVar, Type
+from typing import List, Any, Dict, ClassVar, Type, Union
 
+from src.utils import utils
 from src.components.traces.controls.datepicker import DatePicker
 from src.components.traces.controls.interestpicker import InterestPicker
 from src.components.traces.controls.valuepicker import ValuePicker
@@ -24,29 +25,32 @@ from src.enums import BalanceSides
 
 
 @marshmallow_dataclass.dataclass
+class SinglePaymentParameters:
+    date: datetime = field(default_factory=utils.get_BOM_datetime)
+    value: float = 1000.0
+    interest: float = 0.0
+
+
+@marshmallow_dataclass.dataclass
 class SinglePaymentTrace(Trace):
     side: BalanceSides
     default_name: str = "Single Payment"
-    uuid: UUID = field(default_factory=uuid4)
-    params: Dict[str, Any] = field(default_factory=lambda: {
-        "date": (datetime.today() + pd.offsets.MonthBegin(-1)).normalize(),
-        "value": 1000,
-        "interest": 0.0
-    })
+    params: SinglePaymentParameters = field(default_factory=lambda: SinglePaymentParameters())
+
     Schema: ClassVar[Type[Schema]] = Schema
 
     def __post_init__(self):
         self.controls = [
-            DatePicker("date", label="Date", v_model=self.params["date"].strftime("%Y-%m")),
-            ValuePicker("value", v_model=str(self.params["value"])),
-            InterestPicker("interest", v_model=str(self.params["interest"]))
+            DatePicker("date", label="Date", v_model=self.params.date.strftime("%Y-%m")),
+            ValuePicker("value", v_model=str(self.params.value)),
+            InterestPicker("interest", v_model=str(self.params.interest))
         ]
 
     def get_timeseries(self, dti):
         array_length = len(dti)
-        start_idx = dti.get_loc(self.params["date"])
-        value = self.params["value"]
-        q = 1 + self.params["interest"]/100
+        start_idx = dti.get_loc(self.params.date)
+        value = self.params.value
+        q = 1 + self.params.interest/100
         interest_factor_per_month = pow(q, 1/12)
         result = self.get_array(array_length, start_idx, value, interest_factor_per_month)
         if self.side is BalanceSides.Passiva:
@@ -77,31 +81,39 @@ class SinglePaymentTrace(Trace):
 
 
 @marshmallow_dataclass.dataclass
+class ConstantPaymentParameters:
+    from_date: datetime = field(default_factory=utils.get_BOM_datetime)
+    to_date: datetime = field(
+        default_factory=lambda: utils.get_BOM_datetime(
+            datetime.today() + relativedelta(months=6)
+        )
+    )
+    value: float = 100.0
+    interest: float = 0.0
+
+
+@marshmallow_dataclass.dataclass
 class ConstantPaymentTrace(Trace):
     side: BalanceSides
     default_name: str = "Constant Payment"
-    uuid: UUID = field(default_factory=uuid4)
-    params: Dict[str, Any] = field(default_factory=lambda: {
-        "from_date": (datetime.today() + pd.offsets.MonthBegin(-1)).normalize(),
-        "to_date": (datetime.today() + pd.offsets.MonthBegin(-1)).normalize() + relativedelta(months=6),
-        "value": 100.0,
-        "interest": 0.0
-    })
+    params: ConstantPaymentParameters = field(default_factory=lambda: ConstantPaymentParameters())
+
+    Schema: ClassVar[Type[Schema]] = Schema
 
     def __post_init__(self):
         self.controls = [
-            DatePicker("from_date", label="From Date", v_model=self.params["from_date"].strftime("%Y-%m")),
-            DatePicker("to_date", label="To Date", v_model=self.params["to_date"].strftime("%Y-%m")),
-            ValuePicker("value", v_model=str(self.params["value"])),
-            InterestPicker("interest", v_model=str(self.params["interest"]))
+            DatePicker("from_date", label="From Date", v_model=self.params.from_date.strftime("%Y-%m")),
+            DatePicker("to_date", label="To Date", v_model=self.params.to_date.strftime("%Y-%m")),
+            ValuePicker("value", v_model=str(self.params.value)),
+            InterestPicker("interest", v_model=str(self.params.interest))
         ]
 
     def get_timeseries(self, dti):
         array_length = len(dti)
-        start_idx = dti.get_loc(self.params["from_date"])
-        end_idx = dti.get_loc(self.params["to_date"])
-        value = self.params["value"]
-        q = 1 + self.params["interest"]/100
+        start_idx = dti.get_loc(self.params.from_date)
+        end_idx = dti.get_loc(self.params.to_date)
+        value = self.params.value
+        q = 1 + self.params.interest/100
         interest_factor_per_month = pow(q, 1/12)
         result = self.get_array(array_length, start_idx, end_idx, value, interest_factor_per_month)
         if self.side is BalanceSides.Passiva:

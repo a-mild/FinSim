@@ -2,8 +2,6 @@ import ipyvuetify as v
 import ipywidgets as w
 import traitlets
 
-import plotly.graph_objs as go
-
 from src.components.tracecontroller import TraceController
 from src.components.appbar import AppBar
 from src.components.plotcontainer import PlotContainer
@@ -29,7 +27,5 @@ class App(v.VuetifyTemplate):
         self.model = model
         self.tracecontroller_drawer = TraceController()
         self.app_bar = AppBar(model)
-        self.plot_container = PlotContainer()
-        trace = go.Scatter(x=self.model.df.index, y=self.model.df["sum"])
-        self.plot_container.figure.add_trace(trace)
+        self.plot_container = PlotContainer(model)
         super().__init__()

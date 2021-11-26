@@ -26,7 +26,7 @@ class TraceWidget(v.VuetifyTemplate):
         self.controls = controls
         # connect the signals
         for c in self.controls:
-            value_updated.connect(self.update_params, sender=c, weak=False)
+            value_updated.connect(self.update_params, sender=c.paramname, weak=False)
         super().__init__()
 
     @property
@@ -40,5 +40,5 @@ class TraceWidget(v.VuetifyTemplate):
     def vue_delete_trace(self, data=None):
         delete_trace.send(self.side, uuid=self.uuid)
 
-    def update_params(self, sender):
-        update_trace.send(self.uuid, params=self.params)
+    def update_params(self, paramname: str, value):
+        update_trace.send(self.uuid, paramname=paramname, value=value)

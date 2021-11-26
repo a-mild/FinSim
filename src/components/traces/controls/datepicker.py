@@ -23,8 +23,8 @@ class DatePicker(v.VuetifyTemplate):
         super().__init__(**kwargs)
 
     @observe("v_model")
-    def on_change(self, data=None):
-        value_updated.send(self)
+    def on_change(self, event=None):
+        value_updated.send(self.paramname, value=self.get_value())
 
     def get_value(self):
         return datetime.strptime(self.v_model, "%Y-%m")

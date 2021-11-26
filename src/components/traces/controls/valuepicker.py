@@ -21,16 +21,16 @@ class ValuePicker(v.VuetifyTemplate):
         super().__init__(**kwargs)
 
     @property
-    def valid_input(self):
+    def valid_input(self) -> bool:
         if self.v_model:
             return bool(re.match(self.valid_regex, self.v_model))
         else:
             return False
 
-    def vue_on_change(self, data=None):
+    def vue_on_change(self, event=None) -> None:
         if not self.valid_input:
             return
-        value_updated.send(self)
+        value_updated.send(self.paramname, value=self.get_value())
 
     def get_value(self) -> float:
         return float(self.v_model.replace(",", ""))
